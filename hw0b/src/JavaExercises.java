@@ -6,7 +6,11 @@ public class JavaExercises {
     /** Returns an array [1, 2, 3, 4, 5, 6] */
     public static int[] makeDice() {
         // TODO: Fill in this function.
-        return null;
+        int[] ans = new int[6];
+        for (int i = 0; i < 6; i++) {
+            ans[i] = i + 1;
+        }
+        return ans;
     }
 
     /** Returns the order depending on the customer.
@@ -15,14 +19,37 @@ public class JavaExercises {
      *  In any other case, return an empty String[] of size 3. */
     public static String[] takeOrder(String customer) {
         // TODO: Fill in this function.
-        return null;
+        String[] ans = new String[4];
+        if ("Ergun".equals(customer)) {
+            ans[0] = "beyti";
+            ans[1] = "pizza";
+            ans[2] = "hamburger";
+            ans[3] = "tea";
+            return ans;
+        } else if ("Erik".equals(customer)) {
+            ans[0] = "sushi";
+            ans[1] = "pasta";
+            ans[2] = "avocado";
+            ans[3] = "coffee";
+            return ans;
+        }
+        return new String[3];
     }
 
     /** Returns the positive difference between the maximum element and minimum element of the given array.
      *  Assumes array is nonempty. */
     public static int findMinMax(int[] array) {
         // TODO: Fill in this function.
-        return 0;
+        int maxn = array[0], minn = array[0];
+        for (int num : array) {
+            if (num > maxn) {
+                maxn = num;
+            }
+            if (num < minn) {
+                minn = num;
+            }
+        }
+        return maxn - minn;
     }
 
     /**
@@ -39,7 +66,14 @@ public class JavaExercises {
 
     private static List<Integer> hailstoneHelper(int x, List<Integer> list) {
         // TODO: Fill in this function.
-        return null;
+        list.add(x);
+        if (x == 1) {
+            return list;
+        } else if (x % 2 == 0) {
+            return hailstoneHelper(x / 2, list);
+        } else if (x % 2 == 1) {
+            return hailstoneHelper(3 * x + 1, list);
+        }
+        return list;
     }
-
 }
