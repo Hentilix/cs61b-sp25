@@ -1,30 +1,61 @@
 You must answer at least 4 questions, but the remaining ones are optional. The main goal of this file is to get you thinking critically about your own work, but we will also use these self reflections at the end of the semester when we do our internal review of the course.
 
+自学说明：以下是根据当前仓库代码和已有测试整理的中文反思稿。
+ArrayDeque61B 以 proj1b/src/deque/ArrayDeque61B.java 为依据；
+LinkedListDeque61B 以 proj1a/src/LinkedListDeque61B.java 为主要依据，
+并与 proj1b/src/deque/LinkedListDeque61B.java 中的后续版本比较。
+两部分均回答了“优点、可改进之处、事前认识、重新实现”四个问题。
+本次没有使用 TA 讲解或同伴讨论作为依据，相应问题如实注明。
+这份自学反思不代表已完成课程现场互评和 TA 验收；magic_word.txt 等待 TA 提供口令。
+课程要求：https://sp25.datastructur.es/labs/lab05/
+
 ArrayDeque61B:
 
 Q: Give an example of at least one idea from the staff solution that would have made your solution better (if any).
 
-A: 
+A: 本次自学未获得 staff solution，因此无法评价其中的具体设计。
+下文的改进建议来自对当前实现的检查，不归因于未看过的官方解答。
 
 Q: What's something you felt proud of in your code, if anything?
 
-A:
+A: 我认为这份实现值得肯定的是，resize 把循环数组按逻辑顺序复制到新数组，
+然后统一设置 head = 0、tail = size，扩容和缩容可以共用这一套逻辑。
+删除元素时会把原位置设为 null，避免数组继续持有已经移除的对象。
+两个删除方法还共用 shrinkIfNeeded，使缩容判断集中在一个地方。
+已有测试不仅检查简单的插入删除，还覆盖回绕后的扩容、反复扩缩容和清空后复用；
+alternatingEndsMatchJavaDeque 使用固定随机种子，与 Java 的 ArrayDeque 对照 20000 步操作，
+这比只检查几个最终输出更能覆盖不同操作顺序下的行为。
 
 Q: What's something that was particularly inelegant in your code, if anything?
 
-A:
+A: capacity 与 items.length 表示同一件事，但都作为状态保存，每次更换数组时必须同步更新。
+当前 resize 做到了这一点，不过这种冗余增加了后续修改时遗漏更新的可能。
+另外，resize、toList 和 get 都重复计算 Math.floorMod(head + i, capacity)，
+而 addFirst 的向前回绕使用三元表达式，removeLast 则使用 floorMod，索引表达方式不够统一。
+可以考虑用 items.length 作为容量的唯一来源，并用小型私有辅助方法统一逻辑索引到数组下标的转换。
 
 Q: What did you learn by talking to your partner about writing ArrayDeque61B?
 
-A:
+A: 不适用：本次为自学代码复盘，未进行同伴讨论。
 
 Q: What do you wish you would have known before writing ArrayDeque61B, if anything?
 
-A:
+A: 我希望在动手前先明确索引约定：head 指向第一个元素，tail 指向下一次 addLast 的位置，
+逻辑下标 i 对应 Math.floorMod(head + i, capacity)，并由 size 区分空队列和满队列。
+空和满时都可能有 head == tail，所以不能单凭两个指针相等来判断是否为空。
+还应提前注意 Java 的负数取余，例如 -1 % 8 得到 -1，不能直接用作数组下标。
+扩缩容虽然单次需要复制 O(n) 个元素，但按倍数调整容量可以使端点操作保持均摊 O(1)。
+当前代码在删除前检查是否缩容，因此设计阈值测试时也必须明确使用的是删除前还是删除后的 size。
 
 Q: If you wrote ArrayDeque61B again, what would you do differently, if anything?
 
-A:
+A: 我会先写下并检查表示不变量：0 <= size <= capacity，head 和 tail 都是合法数组下标，
+每次公开操作结束时 tail == (head + size) % capacity。
+再用小例子画出 addFirst、addLast、removeFirst 和 removeLast 对这些状态的影响。
+测试会先覆盖容量 8 到 16 的扩容、head 跨过数组边界、使用率恰好为四分之一时的缩容，
+以及删除到空后从两端重新添加。现有的随机对照测试和存储检查也值得保留。
+实现时会减少重复的容量状态和索引表达式，并继续在删除时释放数组中的对象引用。
+这些是重新实现时的设计取舍，本次 Lab05 没有对 Project 1B 做代码重构。
 
 -----
 
@@ -32,27 +63,50 @@ LinkedListDeque61B:
 
 Q: Give an example of at least one idea from the staff solution that would have made your solution better (if any).
 
-A: 
+A: 本次自学未获得 staff solution，因此不能把循环哨兵或其他设计归因于 TA 的讲解。
+下文以当前 Project 1A 实现和仓库中的 Project 1B 后续版本为依据进行复盘。
 
 Q: What's something you felt proud of in your code, if anything?
 
-A:
+A: 我认为循环双向哨兵的设计比较清晰。空队列时 sentinel.next 和 sentinel.prev 都指向 sentinel，
+插入第一个元素与插入后续元素可以使用同一套连接方式；删除最后一个元素后也会自然恢复空队列结构。
+addFirst、addLast、removeFirst 和 removeLast 只修改固定数量的指针，因此都是 O(1)。
+getRecursive 将越界检查放在公开方法里，再交给 getRecursiveHelper 沿 next 递归，
+辅助方法只需要处理当前位置和剩余距离，职责比较单一。
+已有测试覆盖删除到空、只剩一个元素、重新添加、非法索引，以及 toList 返回独立副本等情况。
 
 Q: What's something that was particularly inelegant in your code, if anything?
 
-A:
+A: Project 1A 的 toList 对空队列单独写了 if/else，但从 sentinel.next 开始、
+以 begin != sentinel 为条件的循环在空队列中本来就会执行零次，因此这处分支可以省掉。
+removeFirst、removeLast 和 get 在提前 return 后仍用 else 包住后续代码，也增加了不必要的缩进。
+temp、begin 这样的局部变量名可以改成 newNode、current 或 result，使用途更清楚。
+Project 1B 的链表版本已经去掉这些方法中的部分多余分支，并用迭代器实现 toList，
+因此仓库里已有一个可直接比较的简化版本，而不是所有改进都还停留在设想中。
 
 Q: What did you learn by talking to your partner about writing LinkedListDeque61B?
 
-A:
+A: 不适用：本次为自学代码复盘，未进行同伴讨论。
 
 Q: What do you wish you would have known before writing LinkedListDeque61B, if anything?
 
-A:
+A: 我希望在实现前先画出空、单元素和多元素队列，明确哨兵不存放实际数据，size 也不包含哨兵。
+每次修改连接都应检查两个方向：相邻结点的 next 和 prev 必须互相对应；
+队首的 prev、队尾的 next 应回到 sentinel，空队列则由 sentinel 自己形成环。
+这样检查的是结构是否始终成立，而不是遇到某个边界情况后再补一个特殊分支。
+另外，链表 get(index) 需要沿结点遍历；如果用循环反复调用 get(i) 来构造列表，
+总时间会变成 O(n^2)，直接沿 next 遍历只需要 O(n)。
+递归访问还会使用与访问距离成正比的调用栈空间，迭代版本则只需 O(1) 额外空间。
 
 Q: If you wrote LinkedListDeque61B again, what would you do differently, if anything?
 
-A:
+A: 我会保留循环双向哨兵，先围绕“空 -> 一个元素 -> 多个元素 -> 一个元素 -> 空”写测试，
+并让添加和删除交替发生在两端，检查顺序、size 和清空后复用是否正确。
+随后用提前返回处理空队列和非法索引，让正常路径保持平直；toList 直接遍历，不为零个元素另设分支。
+sentinel 引用可以声明为 final，表达哨兵结点不会被整体替换；Project 1B 版本已这样处理。
+如果将来插入或删除逻辑出现更多重复，再考虑抽取连接结点或移除结点的私有辅助方法，
+但目前两端操作很短，没有必要仅为减少几行代码而引入过多间接调用。
+对于 Project 1B 中需要遍历的功能，我会继续复用迭代器，避免各方法各写一套结点遍历逻辑。
 
 -----
 
@@ -60,4 +114,7 @@ Meta:
 
 Q: Did you like this design review process? Anything we should do differently next time?
 
-A: 
+A: 就这次自学复盘而言，我认为把讨论落实到表示不变量、重复状态、边界测试和复杂度，比只检查输出更有帮助。
+对照 Project 1A 与 Project 1B 的链表实现，也能看到哪些分支已经被简化，以及哪些遍历逻辑可以复用。
+若以后有同伴或 TA 参与，我希望每个人先选一段具体代码和一个边界用例，说明设计取舍后再互相提问，
+最后把建议整理成可验证的小改进。本次没有真实的课堂互评经历，因此不评价课堂组织或同伴反馈。
