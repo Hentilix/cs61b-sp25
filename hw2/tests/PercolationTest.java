@@ -1,14 +1,13 @@
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class PercolationTest {
 
     /**
      * Enum to represent the state of a cell in the grid. Use this enum to help you write tests.
      * <p>
-     * (0) CLOSED: isOpen() returns true, isFull() return false
+     * (0) CLOSED: isOpen() returns false, isFull() returns false
      * <p>
      * (1) OPEN: isOpen() returns true, isFull() returns false
      * <p>
@@ -76,13 +75,6 @@ public class PercolationTest {
         };
         assertThat(getState(N, p)).isEqualTo(expectedState);
         assertThat(p.percolates()).isTrue();
-    }
-
-    // TODO: Using the given tests above as a template,
-    //       write some more tests and delete the fail() line
-    @Test
-    public void yourFirstTestHere() {
-        fail("Did you write your own tests?");
     }
 
 }
