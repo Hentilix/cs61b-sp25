@@ -1,5 +1,6 @@
 package ngrams;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -30,15 +31,18 @@ public class TimeSeries extends TreeMap<Integer, Double> {
      */
     public TimeSeries(TimeSeries ts, int startYear, int endYear) {
         super();
-        // TODO: Fill in this constructor.
+        ts.forEach((year, value) -> {
+            if (year >= startYear && year <= endYear) {
+                put(year, value);
+            }
+        });
     }
 
     /**
      *  Returns all years for this time series in ascending order.
      */
     public List<Integer> years() {
-        // TODO: Fill in this method.
-        return null;
+        return new ArrayList<>(keySet());
     }
 
     /**
@@ -46,8 +50,7 @@ public class TimeSeries extends TreeMap<Integer, Double> {
      *  order of years().
      */
     public List<Double> data() {
-        // TODO: Fill in this method.
-        return null;
+        return new ArrayList<>(values());
     }
 
     /**
@@ -60,8 +63,10 @@ public class TimeSeries extends TreeMap<Integer, Double> {
      * should store the value from the TimeSeries that contains that year.
      */
     public TimeSeries plus(TimeSeries ts) {
-        // TODO: Fill in this method.
-        return null;
+        TimeSeries result = new TimeSeries();
+        result.putAll(this);
+        ts.forEach((year, value) -> result.merge(year, value, Double::sum));
+        return result;
     }
 
     /**
@@ -74,10 +79,13 @@ public class TimeSeries extends TreeMap<Integer, Double> {
      * If TS has a year that is not in this TimeSeries, ignore it.
      */
     public TimeSeries dividedBy(TimeSeries ts) {
-        // TODO: Fill in this method.
-        return null;
+        TimeSeries result = new TimeSeries();
+        for (Integer year : keySet()) {
+            if (!ts.containsKey(year)) {
+                throw new IllegalArgumentException("Missing year in divisor: " + year);
+            }
+            result.put(year, get(year) / ts.get(year));
+        }
+        return result;
     }
-
-    // TODO: Add any private helper methods.
-    // TODO: Remove all TODO comments before submitting.
 }
